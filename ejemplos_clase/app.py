@@ -3,7 +3,7 @@
 API Monitor cardíaco
 ---------------------------
 Autor: Inove Coding School
-Version: 1.0
+Version: 1.1
  
 Descripcion:
 Se utiliza Flask para crear un WebServer que levanta los datos de
@@ -20,7 +20,7 @@ http://127.0.0.1:5000/
 
 __author__ = "Inove Coding School"
 __email__ = "INFO@INOVE.COM.AR"
-__version__ = "1.0"
+__version__ = "1.1"
 
 # Realizar HTTP POST --> https://www.codepunker.com/tools/http-requests
 
@@ -36,8 +36,9 @@ from datetime import datetime, timedelta
 import numpy as np
 from flask import Flask, request, jsonify, render_template, Response, redirect
 import matplotlib
-matplotlib.use('Agg')   # For multi thread, non-interactive backend (avoid run in main loop)
+matplotlib.use('Agg')   # Para multi-thread, non-interactive backend (avoid run in main loop)
 import matplotlib.pyplot as plt
+# Para convertir matplotlib a imagen y luego a datos binarios
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
@@ -45,7 +46,7 @@ import matplotlib.image as mpimg
 import heart
 from config import config
 
-
+# Crear el server Flask
 app = Flask(__name__)
 
 # Obtener la path de ejecución actual del script
@@ -56,9 +57,10 @@ config_path_name = os.path.join(script_path, 'config.ini')
 db = config('db', config_path_name)
 server = config('server', config_path_name)
 
+# Enviar los datos de config de la DB
 heart.db = db
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
 def index():
     try:
@@ -74,7 +76,7 @@ def index():
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000/reset
 @app.route("/reset")
 def reset():
     try:
@@ -85,7 +87,7 @@ def reset():
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones
 @app.route("/pulsaciones")
 def pulsaciones():
     try:
@@ -95,7 +97,7 @@ def pulsaciones():
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/tabla
 @app.route("/pulsaciones/tabla")
 def pulsaciones_tabla():
     try:
@@ -105,7 +107,7 @@ def pulsaciones_tabla():
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/{nombre}/historico
 @app.route("/pulsaciones/<name>/historico")
 def pulsaciones_historico(name):
     try:
@@ -125,7 +127,7 @@ def pulsaciones_historico(name):
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-
+# Ruta que se ingresa por la ULR 127.0.0.1:5000/registro
 @app.route("/registro", methods=['POST'])
 def registro():
     if request.method == 'POST':
@@ -173,8 +175,8 @@ def html_table(data):
     result = '<table border="1">'
     result += '<thead cellpadding="1.0" cellspacing="1.0">'
     result += '<tr>'
-    result += '<th>Nombre</th>'
     result += '<th>Fecha</th>'
+    result += '<th>Nombre</th>'
     result += '<th>Último registro</th>'
     result += '<th>Nº de registros</th>'
     result += '</tr>'
@@ -198,6 +200,7 @@ def html_table(data):
 if __name__ == '__main__':
     print('Inove@Monitor Cardíaco start!')
 
+    # Lanzar server
     app.run(host=server['host'],
             port=server['port'],
             debug=True)
