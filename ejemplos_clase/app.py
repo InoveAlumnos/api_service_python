@@ -123,6 +123,7 @@ def pulsaciones_historico(name):
         # y mostrar en el HTML
         output = io.BytesIO()
         FigureCanvas(fig).print_png(output)
+        plt.close(fig)  # Cerramos la imagen para que no consuma memoria del sistema
         return Response(output.getvalue(), mimetype='image/png')
     except:
         return jsonify({'trace': traceback.format_exc()})
@@ -137,7 +138,7 @@ def registro():
 
         if(nombre is None or pulsos is None or pulsos.isdigit() is False):
             # Datos ingresados incorrectos
-                return Response(status=404)
+                return Response(status=400)
         time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         heart.insert(time, nombre, int(pulsos))
         return Response(status=200)
