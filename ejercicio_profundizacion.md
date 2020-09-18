@@ -1,4 +1,4 @@
-# Ejercicios de práctica [Python]
+# Ejercicios de profundización [Python]
 EL propósito de este ejercicio es que el alumno ponga sus habilidades JSON, matplotlib, bases de datos, request API JSON y Rest API.
 
 # Enunciado
