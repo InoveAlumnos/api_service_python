@@ -33,7 +33,7 @@ url = f'http://{ip}:{port}/{endpoint}'
 
 if __name__ == "__main__":
     try:
-        name = 'Inove'
+        name = str(input('Ingrese el nombre de la persona:'))
         heartrate = int(input('Ingrese el ritmo cardiago:'))
         post_data = {"name": name, "heartrate": heartrate}        
         x = requests.post(url, data = post_data)
