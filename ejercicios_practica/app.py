@@ -22,7 +22,7 @@ __author__ = "Inove Coding School"
 __email__ = "INFO@INOVE.COM.AR"
 __version__ = "1.0"
 
-# Realizar HTTP POST --> https://www.codepunker.com/tools/http-requests
+# Realizar HTTP POST --> post.py
 
 import traceback
 import io
