@@ -41,15 +41,15 @@ if __name__ == "__main__":
 # API
 
 ## Endpoints
-__[GET] /user/{id}/titles__\
+__[GET] /user/{id}/titles__
 - Esta ruta es la encargada a informar al solicitante cuantos titulos completó el usuario cuyo id es el pasado como parámetro en la URL estática. Deben imprimir en el HTML cuantos títulos completó ese usuario.\
 NOTA: Utilice "title_completed_count" para obtener la información necesaria.
 
-__[GET] /user/graph__\
+__[GET] /user/graph__
 - Esta ruta es la encargada a informar el reporte y comparativa de cuantos títulos completó cada usuario en un gráfico. Debe obtener la información de todos los usuarios (la cantidad de títulos que completó cada uno) para armar el gráfico que usted crea mejor que resuelve el reporte solicitado.
 NOTA: Puede Utilizar "title_completed_count" para obtener la información necesaria o crear una nueva función.
 
-__[GET] /user/table__\
+__[GET] /user/table__
 - Esta ruta es la encargada a informar cuantos títulos completó cada usuario en una tabla HTML o JSON (queda a su criterio). Debe recolectar la misma información solicitada en el anterior punto pero cambiar la estrategía de visualización.
 
 
