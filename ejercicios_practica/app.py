@@ -102,6 +102,9 @@ def comparativa():
         # Mostrar todos los registros en formato tabla
         result = '''<h3>Implementar una función en persona.py
                     nationality_review</h3>'''
+        result += '''<h3>El eje "X" del gráfico debe ser los IDs
+                    de las personas y el eje "Y" deben ser sus
+                    respectivas edades</h3>'''
         result += '''<h3>Esa funcion debe devolver los datos que necesite
                     para implementar el grafico a mostrar</h3>'''
         return (result)
