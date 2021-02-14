@@ -16,7 +16,13 @@ __version__ = "1.1"
 import os
 import sqlite3
 
-db = {}
+from config import config
+# Obtener la path de ejecución actual del script
+script_path = os.path.dirname(os.path.realpath(__file__))
+
+# Obtener los parámetros del archivo de configuración
+config_path_name = os.path.join(script_path, 'config.ini')
+db = config('db', config_path_name)
 
 
 def create_schema():

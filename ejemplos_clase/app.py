@@ -43,7 +43,9 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
-import heart
+import heart_orm as heart
+#import heart as heart  # Puede elegir esta opcion sino quieren usar ORM
+
 from config import config
 
 # Crear el server Flask
@@ -54,11 +56,8 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # Obtener los parámetros del archivo de configuración
 config_path_name = os.path.join(script_path, 'config.ini')
-db = config('db', config_path_name)
 server = config('server', config_path_name)
 
-# Enviar los datos de config de la DB
-heart.db = db
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
@@ -69,7 +68,6 @@ def index():
         result += "<h2>Endpoints disponibles:</h2>"
         result += "<h3>[GET] /reset --> borrar y crear la base de datos</h3>"
         result += "<h3>[GET] /pulsaciones?limit=[]&offset=[] --> mostrar últimas pulsaciones registradas (limite and offset are optional)</h3>"
-        result += "<h3>[GET] /pulsaciones/tabla?limit=[]&offset=[] --> mostrar últimas pulsaciones registradas (limite and offset are optional)</h3>"
         result += "<h3>[GET] /pulsaciones/{name}/historico --> mostrar el histórico de pulsaciones de una persona</h3>"
         result += "<h3>[POST] /registro --> ingresar nuevo registro de pulsaciones por JSON</h3>"
         return(result)
@@ -91,21 +89,27 @@ def reset():
 @app.route("/pulsaciones")
 def pulsaciones():
     try:
-        # Mostrar todos los registros en formato JSON
-        result = show()
-        return (result)
+        # Obtener de la query string los valores de limit y offset
+        limit_str = str(request.args.get('limit'))
+        offset_str = str(request.args.get('offset'))
+
+        limit = 0
+        offset = 0
+
+        if(limit_str is not None) and (limit_str.isdigit()):
+            limit = int(limit_str)
+
+        if(offset_str is not None) and (offset_str.isdigit()):
+            offset = int(offset_str)
+
+        # Obtener el reporte
+        data = heart.report(limit=limit, offset=offset)
+
+        # Transformar json a json string
+        return jsonify(data)
     except:
         return jsonify({'trace': traceback.format_exc()})
 
-# Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/tabla
-@app.route("/pulsaciones/tabla")
-def pulsaciones_tabla():
-    try:
-        # Mostrar todos los registros en formato tabla
-        result = show('table')
-        return (result)
-    except:
-        return jsonify({'trace': traceback.format_exc()})
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/{nombre}/historico
 @app.route("/pulsaciones/<name>/historico")
@@ -139,63 +143,9 @@ def registro():
         if(nombre is None or pulsos is None or pulsos.isdigit() is False):
             # Datos ingresados incorrectos
                 return Response(status=400)
-        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        time = datetime.now()
         heart.insert(time, nombre, int(pulsos))
         return Response(status=200)
-
-
-def show(show_type='json'):
-
-    # Obtener de la query string los valores de limit y offset
-    limit_str = str(request.args.get('limit'))
-    offset_str = str(request.args.get('offset'))
-
-    limit = 0
-    offset = 0
-
-    if(limit_str is not None) and (limit_str.isdigit()):
-        limit = int(limit_str)
-
-    if(offset_str is not None) and (offset_str.isdigit()):
-        offset = int(offset_str)
-
-    if show_type == 'json':
-        data = heart.report(limit=limit, offset=offset, dict_format=True)
-        return jsonify(data)
-    elif show_type == 'table':
-        data = heart.report(limit=limit, offset=offset)
-        return html_table(data)
-    else:
-        data = heart.report(limit=limit, offset=offset, dict_format=True)
-        return jsonify(data)
-
-
-def html_table(data):
-
-    # Tabla HTML, header y formato
-    result = '<table border="1">'
-    result += '<thead cellpadding="1.0" cellspacing="1.0">'
-    result += '<tr>'
-    result += '<th>Fecha</th>'
-    result += '<th>Nombre</th>'
-    result += '<th>Último registro</th>'
-    result += '<th>Nº de registros</th>'
-    result += '</tr>'
-
-    for row in data:
-        # Fila de una tabla HTML
-        result += '<tr>'
-        result += '<td>' + str(row[0]) + '</td>'
-        result += '<td>' + str(row[1]) + '</td>'
-        result += '<td>' + str(row[2]) + '</td>'
-        result += '<td>' + str(row[3]) + '</td>'
-        result += '</tr>'
-
-    # Fin de la tabla HTML
-    result += '</thead cellpadding="0" cellspacing="0" >'
-    result += '</table>'
-
-    return result
 
 
 if __name__ == '__main__':

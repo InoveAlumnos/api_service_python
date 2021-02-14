@@ -42,9 +42,10 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
-import persona
-from config import config
+import persona_orm as persona
+#import persona as persona  # Puede elegir esta opcion sino quieren usar ORM
 
+from config import config
 
 app = Flask(__name__)
 
@@ -53,10 +54,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # Obtener los parámetros del archivo de configuración
 config_path_name = os.path.join(script_path, 'config.ini')
-db = config('db', config_path_name)
 server = config('server', config_path_name)
-
-persona.db = db
 
 
 @app.route("/")
@@ -99,7 +97,6 @@ def personas():
 @app.route("/comparativa")
 def comparativa():
     try:
-        # Mostrar todos los registros en formato tabla
         result = '''<h3>Implementar una función en persona.py
                     nationality_review</h3>'''
         result += '''<h3>El eje "X" del gráfico debe ser los IDs
@@ -119,7 +116,7 @@ def registro():
         # name = ...
         # age = ...
         # nationality = ...
-        
+
         # persona.insert(name, int(age), nationality)
         return Response(status=200)
     
