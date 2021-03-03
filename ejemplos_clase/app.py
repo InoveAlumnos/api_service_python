@@ -3,7 +3,7 @@
 API Monitor cardíaco
 ---------------------------
 Autor: Inove Coding School
-Version: 1.1
+Version: 1.2
  
 Descripcion:
 Se utiliza Flask para crear un WebServer que levanta los datos de
@@ -20,7 +20,7 @@ http://127.0.0.1:5000/
 
 __author__ = "Inove Coding School"
 __email__ = "INFO@INOVE.COM.AR"
-__version__ = "1.1"
+__version__ = "1.2"
 
 # Realizar HTTP POST --> post.py
 
@@ -43,6 +43,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
+from heart_orm import db
 import heart_orm as heart
 #import heart as heart  # Puede elegir esta opcion sino quieren usar ORM
 
@@ -56,7 +57,13 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # Obtener los parámetros del archivo de configuración
 config_path_name = os.path.join(script_path, 'config.ini')
-server = config('server', config_path_name)
+db_config = config('db', config_path_name)
+server_config = config('server', config_path_name)
+
+# Indicamos al sistema (app) de donde leer la base de datos
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_config['database']}"
+# Asociamos nuestro controlador de la base de datos con la aplicacion
+db.init_app(app)
 
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
@@ -152,6 +159,6 @@ if __name__ == '__main__':
     print('Inove@Monitor Cardíaco start!')
 
     # Lanzar server
-    app.run(host=server['host'],
-            port=server['port'],
+    app.run(host=server_config['host'],
+            port=server_config['port'],
             debug=True)

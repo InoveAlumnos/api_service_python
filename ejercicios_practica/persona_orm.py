@@ -3,7 +3,7 @@
 Heart DB manager
 ---------------------------
 Autor: Inove Coding School
-Version: 1.1
+Version: 1.2
 
 Descripcion:
 Programa creado para administrar la base de datos de registro de personas
@@ -11,7 +11,7 @@ Programa creado para administrar la base de datos de registro de personas
 
 __author__ = "Inove Coding School"
 __email__ = "alumnos@inove.com.ar"
-__version__ = "1.1"
+__version__ = "1.2"
 
 import os
 import sqlite3
@@ -22,24 +22,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import func
 
-from config import config
-# Obtener la path de ejecución actual del script
-script_path = os.path.dirname(os.path.realpath(__file__))
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
-# Obtener los parámetros del archivo de configuración
-config_path_name = os.path.join(script_path, 'config.ini')
-db = config('db', config_path_name)
-
-base = declarative_base()
-# Crear el motor (engine) de la base de datos
-engine = sqlalchemy.create_engine(f"sqlite:///{db['database']}")
-
-class Persona(base):
+class Persona(db.Model):
     __tablename__ = "persona"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    age = Column(Integer)
-    nationality = Column(String)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(String)
+    age = db.Column(Integer)
+    nationality = db.Column(String)
     
     def __repr__(self):
         return f"Persona:{self.name} con nacionalidad {self.nacionalidad}"
@@ -48,32 +39,24 @@ class Persona(base):
 def create_schema():
     # Borrar todos las tablas existentes en la base de datos
     # Esta linea puede comentarse sino se eliminar los datos
-    base.metadata.drop_all(engine)
+    db.drop_all()
 
     # Crear las tablas
-    base.metadata.create_all(engine)
+    db.create_all()
 
 
 def insert(name, age, nationality):
-    # Crear la session
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
     # Crear una nueva persona
     person = Persona(name=name, age=age, nationality=nationality)
 
     # Agregar la persona a la DB
-    session.add(person)
-    session.commit()
+    db.session.add(person)
+    db.session.commit()
 
 
 def report(limit=0, offset=0):
-    # Crear la session
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
     # Obtener todas las personas
-    query = session.query(Persona)
+    query = db.session.query(Persona)
     if limit > 0:
         query = query.limit(limit)
         if offset > 0:

@@ -18,31 +18,15 @@ import os
 import sqlite3
 from datetime import datetime, timedelta
 
-import sqlalchemy
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import func
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
-from config import config
-# Obtener la path de ejecución actual del script
-script_path = os.path.dirname(os.path.realpath(__file__))
-
-# Obtener los parámetros del archivo de configuración
-config_path_name = os.path.join(script_path, 'config.ini')
-db = config('db', config_path_name)
-
-base = declarative_base()
-# Crear el motor (engine) de la base de datos
-engine = sqlalchemy.create_engine(f"sqlite:///{db['database']}")
-
-
-class HeartRate(base):
+class HeartRate(db.Model):
     __tablename__ = "heartrate"
-    id = Column(Integer, primary_key=True)
-    time = Column(DateTime)
-    name = Column(String)
-    value = Column(Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.DateTime)
+    name = db.Column(db.String)
+    value = db.Column(db.Integer)
     
     def __repr__(self):
         return f"Paciente {self.name} ritmo cardíaco {self.value}"
@@ -51,29 +35,25 @@ class HeartRate(base):
 def create_schema():
     # Borrar todos las tablas existentes en la base de datos
     # Esta linea puede comentarse sino se eliminar los datos
-    base.metadata.drop_all(engine)
+    db.drop_all()
 
     # Crear las tablas
-    base.metadata.create_all(engine)
+    db.create_all()
 
 
 def insert(time, name, heartrate):
-    # Crear la session
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
     # Crear un nuevo registro de pulsaciones
     pulsaciones = HeartRate(time=time, name=name, value=heartrate)
 
     # Agregar el registro de pulsaciones a la DB
-    session.add(pulsaciones)
-    session.commit()
+    db.session.add(pulsaciones)
+    db.session.commit()
 
 
 def report(limit=0, offset=0):
     # Crear la session
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    #Session = sessionmaker(bind=engine)
+    #session = Session()
 
     json_result_list = []
 
@@ -84,7 +64,7 @@ def report(limit=0, offset=0):
     # with_entities --> especificamos que queremos que devuelva la query,
     # por defecto retorna un objeto HeartRate, nosotros estamos solicitando
     # que además devuelva la cantidad de veces que se repite cada nombre
-    query = session.query(HeartRate).with_entities(HeartRate, func.count(HeartRate.name))
+    query = db.session.query(HeartRate).with_entities(HeartRate, db.func.count(HeartRate.name))
 
     # Agrupamos por paciente (name) para que solo devuelva
     # un valor por paciente
@@ -113,12 +93,12 @@ def report(limit=0, offset=0):
 
 def chart(name):
     # Crear la session
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    #Session = sessionmaker(bind=engine)
+    #session = Session()
 
     # Obtener los últimos 250 registros del paciente
     # ordenado por fecha, obteniedo los últimos 250 registros
-    query = session.query(HeartRate).filter(HeartRate.name == name).order_by(HeartRate.time.desc())
+    query = db.session.query(HeartRate).filter(HeartRate.name == name).order_by(HeartRate.time.desc())
     query = query.limit(250)
     query_results = query.all()
 
@@ -134,8 +114,3 @@ def chart(name):
     heartrate = [x.value for x in reversed(query_results)]
 
     return time, heartrate
-
-if __name__ == '__main__':
-    #insert(datetime.now(), 'Ana', 20)
-    #report()
-    chart('Hernan')

@@ -3,7 +3,7 @@
 API Personas
 ---------------------------
 Autor: Inove Coding School
-Version: 1.0
+Version: 1.2
  
 Descripcion:
 Se utiliza Flask para crear un WebServer que levanta los datos de
@@ -20,7 +20,7 @@ http://127.0.0.1:5000/
 
 __author__ = "Inove Coding School"
 __email__ = "INFO@INOVE.COM.AR"
-__version__ = "1.0"
+__version__ = "1.2"
 
 # Realizar HTTP POST --> post.py
 
@@ -42,6 +42,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
+from persona_orm import db
 import persona_orm as persona
 #import persona as persona  # Puede elegir esta opcion sino quieren usar ORM
 
@@ -54,7 +55,13 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 
 # Obtener los parámetros del archivo de configuración
 config_path_name = os.path.join(script_path, 'config.ini')
-server = config('server', config_path_name)
+db_config = config('db', config_path_name)
+server_config = config('server', config_path_name)
+
+# Indicamos al sistema (app) de donde leer la base de datos
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_config['database']}"
+# Asociamos nuestro controlador de la base de datos con la aplicacion
+db.init_app(app)
 
 
 @app.route("/")
@@ -87,8 +94,16 @@ def reset():
 @app.route("/personas")
 def personas():
     try:
-        # Mostrar todas las personas
-        result = persona.report()
+        # Alumno:
+        # Implementar la captura de limit y offset de los argumentos
+        # de la URL
+        # limit = ...
+        # offset = ....
+
+        # Debe verificar si el limit y offset son válidos cuando
+        # no son especificados en la URL
+
+        result = persona.report(limit=limit, offset=offset)
         return jsonify(result)
     except:
         return jsonify({'trace': traceback.format_exc()})
@@ -97,6 +112,7 @@ def personas():
 @app.route("/comparativa")
 def comparativa():
     try:
+        # Alumno:
         result = '''<h3>Implementar una función en persona.py
                     nationality_review</h3>'''
         result += '''<h3>El eje "X" del gráfico debe ser los IDs
@@ -112,18 +128,22 @@ def comparativa():
 @app.route("/registro", methods=['POST'])
 def registro():
     if request.method == 'POST':
-        # Obtener del HTTP POST JSON el nombre y los pulsos
-        # name = ...
-        # age = ...
-        # nationality = ...
+        try:
+            # Alumno:
+            # Obtener del HTTP POST JSON el nombre y los pulsos
+            # name = ...
+            # age = ...
+            # nationality = ...
 
-        # persona.insert(name, int(age), nationality)
-        return Response(status=200)
+            # persona.insert(name, int(age), nationality)
+            return Response(status=200)
+        except:
+            return jsonify({'trace': traceback.format_exc()})
     
 
 if __name__ == '__main__':
     print('Servidor arriba!')
 
-    app.run(host=server['host'],
-            port=server['port'],
+    app.run(host=server_config['host'],
+            port=server_config['port'],
             debug=True)
