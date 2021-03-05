@@ -103,6 +103,9 @@ def personas():
         # Debe verificar si el limit y offset son válidos cuando
         # no son especificados en la URL
 
+        limit = 0
+        offset = 0
+
         result = persona.report(limit=limit, offset=offset)
         return jsonify(result)
     except:
