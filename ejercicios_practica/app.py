@@ -30,7 +30,6 @@ import sys
 import os
 import base64
 import json
-import sqlite3
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -42,9 +41,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
-from persona_orm import db
-import persona_orm as persona
-#import persona as persona  # Puede elegir esta opcion sino quieren usar ORM
+from persona import db
+import persona
 
 from config import config
 

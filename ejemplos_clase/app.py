@@ -30,10 +30,8 @@ import sys
 import os
 import base64
 import json
-import sqlite3
 from datetime import datetime, timedelta
 
-import numpy as np
 from flask import Flask, request, jsonify, render_template, Response, redirect
 import matplotlib
 matplotlib.use('Agg')   # Para multi-thread, non-interactive backend (avoid run in main loop)
@@ -43,9 +41,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.image as mpimg
 
-from heart_orm import db
-import heart_orm as heart
-#import heart as heart  # Puede elegir esta opcion sino quieren usar ORM
+from heart import db
+import heart
 
 from config import config
 
