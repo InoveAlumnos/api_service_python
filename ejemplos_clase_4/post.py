@@ -1,35 +1,18 @@
-#!/usr/bin/env python
 '''
-API Monitor cardíaco
+API Post [Python]
 ---------------------------
 Autor: Inove Coding School
-Version: 1.0
+Version: 2.0
  
 Descripcion:
 Se utiliza request para generar un HTTP post al servidor Flask
 '''
 
-__author__ = "Inove Coding School"
-__email__ = "INFO@INOVE.COM.AR"
-__version__ = "1.0"
-
-import os
 import requests
 
-from config import config
-
-# Obtener la path de ejecución actual del script
-script_path = os.path.dirname(os.path.realpath(__file__))
-
-# Obtener los parámetros del archivo de configuración
-config_path_name = os.path.join(script_path, 'config.ini')
-server = config('server', config_path_name)
-
-ip = server['host']
-port = server['port']
 endpoint = 'registro'
 
-url = f'http://{ip}:{port}/{endpoint}'
+url = f'http://127.0.0.1:5000/{endpoint}'
 
 if __name__ == "__main__":
     try:

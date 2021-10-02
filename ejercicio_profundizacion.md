@@ -12,10 +12,9 @@ Deberá generar una base de datos SQL que posea los siguientes campos:
 - title --> [texto] nombre del título
 - completed --> [bool] completado o no el título
 
-Luego la información relativa
-
-## clear()
-Deben crear una función "clear" la cual borre todos los campos existentes en la DB, esto les permitirá realizar cada prueba desde cero.
+# Archivo usuario.py
+En este archivo se econtrará la definición de su base de datos y todas las funciones para intercatuar con ella. Dentro del archivo se debe incoporar las funciones que se detallan a continuación.\
+__NOTA:__Es recomendable que primero ensayen por separado el archivo usuario.py y verificar que todo funciona antes de comenzar a utilizarlo en Flask.
 
 ## fill()
 Deben crear una función "fill" que lea los datos provenientes del JSON request y complete la base de datos. Si se fijan los datos que retorna el JSON en el request son exactamente los mismos que se solicitan en el ejercicio, por lo que pueden utilizar los campos como lo leen de la consulta e insertarlos en su DB.
@@ -23,20 +22,20 @@ Deben crear una función "fill" que lea los datos provenientes del JSON request 
 ## title_completed_count(userId)
 Deben crear una función que lea la DB y cuente (count) cuantos usuarios con "userId" han completado sus títulos. Para esta query deberá tener dos campos condicionales en su "filter" (userId y completed) y utilizar el método count para contar los casos favorables.
 
-## Esquema del ejercicio
-Deben crear su archivo de python "app.py" y crear las funciones mencionadas en este documento. Deben crear la sección "if _name_ == "_main_" y ahí lanzar el server Flask. Deberán crear y completar la base de datos para ser utilizar invocar a los endpoints que explorarán los datos, para eso antes de comenzar deben crear el endopint "reset" tal como se vi en clase, en dicho endopint deben llamar a "clear" y "fill"
+# Esquema del ejercicio
+- Deben crear su archivo de python "app.py" y crear las funciones mencionadas en este documento. Deben crear la sección "if _name_ == "_main_" y ahí lanzar el server Flask
+- Crear la funciones mencionadas para poder invocar a los endpoints que explorarán los datos.
+- Deberán crear y completar la base de datos dentro del método que se invoca la primera vez que lanzamos la aplicación
+
 ```
-# Ruta que se ingresa por la ULR 127.0.0.1:5000/reset
-@app.route("/reset")
-def reset():
-    try:
-        # Borrar y crear la base de datos
-        usuarios.clear()
-        usuarios.fill()
-        result = "<h3>Base de datos re-generada!</h3>"
-        return (result)
-    except:
-        return jsonify({'trace': traceback.format_exc()})
+@app.before_first_request
+def before_first_request_func():
+    # Borrar y crear la base de datos
+    usuario.db.create_all()
+    usuario.db.drop_all()
+    # Completar la base de datos
+    usuario.fill()
+    print("Base de datos generada")
 ```
 
 # API

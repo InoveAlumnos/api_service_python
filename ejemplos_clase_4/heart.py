@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 Heart DB manager
 ---------------------------
@@ -10,13 +9,14 @@ Programa creado para administrar la base de datos de registro
 de pulsaciones de personas
 '''
 
-__author__ = "Inove Coding School"
-__email__ = "alumnos@inove.com.ar"
-__version__ = "1.1"
+from datetime import datetime
 
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
+# NOTA: Por un bug en el linter de Visual verán problemas con
+# el tipo de dato "db". No le den importancia
 
 class HeartRate(db.Model):
     __tablename__ = "heartrate"
@@ -27,15 +27,6 @@ class HeartRate(db.Model):
     
     def __repr__(self):
         return f"Paciente {self.name} ritmo cardíaco {self.value}"
-
-
-def create_schema():
-    # Borrar todos las tablas existentes en la base de datos
-    # Esta linea puede comentarse sino se eliminar los datos
-    db.drop_all()
-
-    # Crear las tablas
-    db.create_all()
 
 
 def insert(time, name, heartrate):
@@ -103,3 +94,36 @@ def chart(name):
     heartrate = [x.value for x in reversed(query_results)]
 
     return time, heartrate
+
+
+if __name__ == "__main__":
+    print("Test del modulo heart.py")
+
+    # Crear una aplicación Flask para testing
+    # y una base de datos fantasma (auxiliar o dummy)
+    # Referencia:
+    # https://stackoverflow.com/questions/17791571/how-can-i-test-a-flask-application-which-uses-sqlalchemy
+    app = Flask(__name__)
+    app.config['TESTING'] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///testdatabase.db"
+    # Bindear la DB con nuestra app Flask
+    db.init_app(app)
+    app.app_context().push()
+
+    db.create_all()
+
+    # Aquí se puede ensayar todo lo que necesitemos con nuestra DB
+
+    # Test "insert"
+    # Generamos datos inventados y probamos si funciona correctamente
+    # la función insert
+    insert(time=datetime.now(), name="Inove", heartrate=70)
+
+    # Test "report"
+    # Ahora que nuestra base de datos tiene datos, podemos probar
+    # las funciones que acceden a esos datos y ver si funcionan correctamente
+    datos = report()
+    print(datos)
+
+    db.session.remove()
+    db.drop_all()
