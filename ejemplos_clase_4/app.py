@@ -76,7 +76,10 @@ def pulsaciones():
 @app.route("/pulsaciones/<name>")
 def pulsaciones_historico(name):
     try:
-        # Obtener el historial de la persona de la DB
+        # Obtener el nombre en minúscula
+        name = name.lower()
+        # Obtener el historial de la persona de la DB 
+        print("Obtener gráfico de la persona", name)       
         time, heartrate = heart.chart(name)
 
         # Transformar los datos en una imagen HTML con matplotlib
@@ -89,8 +92,8 @@ def pulsaciones_historico(name):
 @app.route("/registro", methods=['POST'])
 def registro():
     if request.method == 'POST':
-        # Obtener del HTTP POST JSON el nombre y los pulsos
-        nombre = str(request.form.get('name'))
+        # Obtener del HTTP POST JSON el nombre (en minisculas) y los pulsos
+        nombre = str(request.form.get('name')).lower()
         pulsos = str(request.form.get('heartrate'))
 
         if(nombre is None or pulsos is None or pulsos.isdigit() is False):

@@ -74,15 +74,16 @@ def personas():
 def registro():
     if request.method == 'POST':
         try:
+            name = ""
+            age = 0
             # Alumno:
             # Obtener del HTTP POST JSON el nombre y los pulsos
             # name = ...
             # age = ...
 
-            name = str(request.form.get('name'))
-            age = int(request.form.get('age'))
-
-            persona.insert(name, int(age))
+            # Alumno: descomentar la linea persona.insert una vez implementado
+            # lo anterior:
+            # persona.insert(name, int(age))
             return Response(status=200)
         except:
             return jsonify({'trace': traceback.format_exc()})
