@@ -38,7 +38,7 @@ def index():
         result += "<h2>Ejercicio Nº1:</h2>"
         result += "<h3>[GET] /personas?limit=[]&offset=[] --> mostrar el listado de personas (limite and offset are optional)</h3>"
         result += "<h2>Ejercicio Nº2:</h2>"
-        result += "<h3>[POST] /registro --> ingresar nuevo registro de pulsaciones por JSON</h3>"
+        result += "<h3>[POST] /registro --> ingresar una nueva persona por JSON, implementar la captura de los valores</h3>"
         result += "<h2>Ejercicio Nº3:</h2>"
         result += "<h3>[GET] /comparativa --> mostrar un gráfico con las edades de todas las personas"
         
@@ -128,4 +128,4 @@ if __name__ == '__main__':
     print('Inove@Server start!')
 
     # Lanzar server
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000)
