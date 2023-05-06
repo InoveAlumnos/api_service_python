@@ -14,29 +14,30 @@ http://127.0.0.1:5000/
 '''
 
 import traceback
-from flask import Flask, request, jsonify, render_template, Response, redirect
+from flask import Flask, request, jsonify, render_template, Response
 
 # Crear el server Flask
 app = Flask(__name__)
 
 # Variable global para poner a prueba el método [GET]
 # IMPORTANTE: Esta no es una buena forma de manejar datos,
-# se debe usar base de dato (se verá en otro ejemplo más adelante)
+# se debe usar una base de datos (se verá en otro ejemplo más adelante)
 base_de_datos = [
     {
-        "name": "Inove",
-        "heartrate": 80
+        "nombre": "Inove",
+        "pulso": 80
     },
     {
-        "name": "Python",
-        "heartrate": 65
+        "nombre": "Python",
+        "pulso": 65
     },
     {
-        "name": "Max",
-        "heartrate": 110
+        "nombre": "Max",
+        "pulso": 110
     }
 ]
 
+# ------------ Rutas o endpoints ----------------- #
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
 def index():
@@ -45,7 +46,7 @@ def index():
         result = "<h1>Bienvenido!!</h1>"
         result += "<h2>Endpoints disponibles:</h2>"
         result += "<h3>[GET] /pulsaciones?limit=[]&offset=[] --> mostrar últimas pulsaciones registradas (limite and offset are optional)</h3>"
-        result += "<h3>[GET] /pulsaciones/<name> --> mostrar el histórico de pulsaciones de una persona</h3>"
+        result += "<h3>[GET] /pulsaciones/[nombre] --> mostrar el histórico de pulsaciones de una persona</h3>"
         return(result)
     except:
         return jsonify({'trace': traceback.format_exc()})
@@ -83,16 +84,16 @@ def pulsaciones():
 
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/<nombre>
-@app.route("/pulsaciones/<name>")
-def pulsaciones_historico(name):
+@app.route("/pulsaciones/<nombre>")
+def pulsaciones_historico(nombre):
     try:
         # Obtener el historial de la persona
         datos_persona = {}
         for dato in base_de_datos:
-            if dato["name"] == name:
+            if dato["nombre"] == nombre:
                 datos_persona = dato
 
-        print("Dato solicitado para el nombre", name)
+        print("Dato solicitado para el nombre", nombre)
         print(datos_persona)
 
         # Transformar json a json string para enviar al HTML

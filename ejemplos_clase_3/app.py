@@ -16,16 +16,17 @@ http://127.0.0.1:5000/
 # Realizar HTTP POST con --> post.py
 
 import traceback
-from flask import Flask, request, jsonify, render_template, Response, redirect
+from flask import Flask, request, jsonify, render_template, Response
 
 # Crear el server Flask
 app = Flask(__name__)
 
 # Variable global para poner a prueba el método [GET]
 # IMPORTANTE: Esta no es una buena forma de manejar datos,
-# se debe usar base de dato (se verá en otro ejemplo más adelante)
+# se debe usar una base de datos (se verá en otro ejemplo más adelante)
 base_de_datos = []
 
+# ------------ Rutas o endpoints ----------------- #
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
 def index():
@@ -34,7 +35,7 @@ def index():
         result = "<h1>Bienvenido!!</h1>"
         result += "<h2>Endpoints disponibles:</h2>"
         result += "<h3>[GET] /pulsaciones?limit=[]&offset=[] --> mostrar últimas pulsaciones registradas (limite and offset are optional)</h3>"
-        result += "<h3>[GET] /pulsaciones/<name> --> mostrar el histórico de pulsaciones de una persona</h3>"
+        result += "<h3>[GET] /pulsaciones/[nombre] --> mostrar el histórico de pulsaciones de una persona</h3>"
         result += "<h3>[POST] /registro --> ingresar nuevo registro de pulsaciones por JSON</h3>"
         return(result)
     except:
@@ -73,16 +74,16 @@ def pulsaciones():
 
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/<nombre>
-@app.route("/pulsaciones/<name>")
-def pulsaciones_historico(name):
+@app.route("/pulsaciones/<nombre>")
+def pulsaciones_historico(nombre):
     try:
         # Obtener el historial de la persona
         datos_persona = {}
         for dato in base_de_datos:
-            if dato["name"] == name:
+            if dato["nombre"] == nombre:
                 datos_persona = dato
 
-        print("Dato solicitado para el nombre", name)
+        print("Dato solicitado para el nombre", nombre)
         print(datos_persona)
 
         # Transformar json a json string para enviar al HTML
@@ -96,14 +97,15 @@ def pulsaciones_historico(name):
 def registro():
     if request.method == 'POST':
         # Obtener del HTTP POST JSON el nombre y los pulsos
-        nombre = str(request.form.get('name'))
-        pulsos = str(request.form.get('heartrate'))
+        nombre = str(request.form.get('nombre'))
+        pulso = str(request.form.get('pulso'))
 
-        datos_persona = {"name": nombre, "heartrate": pulsos}
+        datos_persona = {"nombre": nombre, "pulso": pulso}
         base_de_datos.append(datos_persona)
         print("Se agregó a la base de datos el siguiente registro:")
         print(datos_persona)
         return Response(status=200)
+
 
 if __name__ == '__main__':
     print('Inove@Server start!')

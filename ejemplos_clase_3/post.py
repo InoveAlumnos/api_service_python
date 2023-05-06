@@ -16,9 +16,9 @@ url = f'http://127.0.0.1:5000/{endpoint}'
 
 if __name__ == "__main__":
     try:
-        name = str(input('Ingrese el nombre de la persona:'))
-        heartrate = int(input('Ingrese el ritmo cardiago:'))
-        post_data = {"name": name, "heartrate": heartrate}        
+        nombre = str(input('Ingrese el nombre de la persona:'))
+        pulso = int(input('Ingrese el ritmo cardiago:'))
+        post_data = {"nombre": nombre, "pulso": pulso}        
         x = requests.post(url, data = post_data)
         print('POST enviado a:',url)
         print('Datos:')

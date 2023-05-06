@@ -18,19 +18,37 @@ http://127.0.0.1:5000/
 from datetime import datetime
 
 import traceback
-from flask import Flask, request, jsonify, render_template, Response, redirect
+from flask import Flask, request, jsonify, render_template, Response
 
+# Importar archivo con funciones de ayuda
 import utils
-import heart
 
 # Crear el server Flask
 app = Flask(__name__)
 
-# Indicamos al sistema (app) de donde leer la base de datos
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///heart.db"
-# Asociamos nuestro controlador de la base de datos con la aplicacion
-heart.db.init_app(app)
+# Base de datos
+from flask_sqlalchemy import SQLAlchemy
 
+# Indicamos al sistema (app) de donde leer la base de datos
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///corazon.db"
+
+# Asociamos nuestro controlador de la base de datos con la aplicacion
+db = SQLAlchemy()
+db.init_app(app)
+
+# ------------ Tablas de la DB ----------------- #
+class Pulsaciones(db.Model):
+    __tablename__ = "pulsaciones"
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime)
+    nombre = db.Column(db.String)
+    valor = db.Column(db.Integer)
+    
+    def __repr__(self):
+        return f"Paciente {self.nombre} ritmo cardíaco {self.valor}"
+
+
+# ------------ Rutas o endpoints ----------------- #
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
 def index():
@@ -39,7 +57,7 @@ def index():
         result = "<h1>Bienvenido!!</h1>"
         result += "<h2>Endpoints disponibles:</h2>"
         result += "<h3>[GET] /pulsaciones?limit=[]&offset=[] --> mostrar últimas pulsaciones registradas (limite and offset are optional)</h3>"
-        result += "<h3>[GET] /pulsaciones/<name> --> mostrar el histórico de pulsaciones de una persona</h3>"
+        result += "<h3>[GET] /pulsaciones/[nombre] --> mostrar el histórico de pulsaciones de una persona</h3>"
         result += "<h3>[POST] /registro --> ingresar nuevo registro de pulsaciones por JSON</h3>"
         return(result)
     except:
@@ -63,44 +81,91 @@ def pulsaciones():
         if(offset_str is not None) and (offset_str.isdigit()):
             offset = int(offset_str)
 
-        # Obtener el reporte
-        data = heart.report(limit=limit, offset=offset)
+        # Obtener todos los pacientes:
+        query = db.session.query(Pulsaciones)     
 
-        # Transformar json a json string para enviar al HTML
+        # Ordenamos por fecha para obtener primero el ultimo registro
+        query = query.order_by(Pulsaciones.fecha.desc())     
+
+        # Si se indica limit, debemos
+        # limitar la cantidad de pacientes a mostrar
+        if limit > 0:
+            query = query.limit(limit)
+            if offset > 0:
+                query = query.offset(offset)
+
+        # Obtener el reporte
+        data = []
+
+        for paciente in query:
+            json_result = {}
+            json_result['fecha'] = paciente.fecha.strftime("%Y-%m-%d %H:%M:%S.%f")
+            json_result['nombre'] = paciente.nombre
+            json_result['pulso'] = paciente.valor
+            data.append(json_result)
+
+        print("Pulsaciones almacenadas (historico):")
+        print(data)
+
+        # Transformar el diccionario a json string para enviar al HTML
         return jsonify(data)
     except:
         return jsonify({'trace': traceback.format_exc()})
 
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000/pulsaciones/<nombre>
-@app.route("/pulsaciones/<name>")
-def pulsaciones_historico(name):
+@app.route("/pulsaciones/<nombre>")
+def pulsaciones_historico(nombre):
     try:
         # Obtener el nombre en minúscula
-        name = name.lower()
+        nombre = nombre.lower()
         # Obtener el historial de la persona de la DB 
-        print("Obtener gráfico de la persona", name)       
-        time, heartrate = heart.chart(name)
+        print("Obtener gráfico de la persona", nombre)
+
+        query = db.session.query(Pulsaciones).filter(Pulsaciones.nombre == nombre).order_by(Pulsaciones.fecha.desc())
+        query = query.limit(250)
+        query_results = query.all()
+
+        if query_results is None or len(query_results) == 0:
+            # No data registros
+            # Bug a proposito dejado para poner a prueba el traceback
+            # ya que el sistema espera una tupla
+            return []
+
+        # De los resultados obtenidos tomamos el tiempo y las puslaciones pero
+        # en el orden inverso (revsersed), para tener del más viejo a la más nuevo registro
+        fechas = [x.fecha.strftime("%Y-%m-%d %H:%M:%S.%f") for x in reversed(query_results)]
+        pulsos = [x.valor for x in reversed(query_results)]
 
         # Transformar los datos en una imagen HTML con matplotlib
-        image_html = utils.graficar(time, heartrate)
+        image_html = utils.graficar(fechas, pulsos)
         return Response(image_html.getvalue(), mimetype='image/png')
     except:
         return jsonify({'trace': traceback.format_exc()})
+
 
 # Ruta que se ingresa por la ULR 127.0.0.1:5000/registro
 @app.route("/registro", methods=['POST'])
 def registro():
     if request.method == 'POST':
         # Obtener del HTTP POST JSON el nombre (en minisculas) y los pulsos
-        nombre = str(request.form.get('name')).lower()
-        pulsos = str(request.form.get('heartrate'))
+        nombre = str(request.form.get('nombre')).lower()
+        pulso = str(request.form.get('pulso'))
 
-        if(nombre is None or pulsos is None or pulsos.isdigit() is False):
+        if(nombre is None or pulso is None or pulso.isdigit() is False):
             # Datos ingresados incorrectos
-                return Response(status=400)
-        time = datetime.now()
-        heart.insert(time, nombre, int(pulsos))
+            return Response(status=400)
+        
+        # Obtener la fecha y hora actual
+        fecha = datetime.now()
+
+        # Crear un nuevo registro de pulsaciones
+        pulsaciones = Pulsaciones(fecha=fecha, nombre=nombre, valor=int(pulso))
+
+        # Agregar el registro de pulsaciones a la DB
+        db.session.add(pulsaciones)
+        db.session.commit()
+
         return Response(status=200)
 
 
@@ -109,7 +174,7 @@ def registro():
 @app.before_first_request
 def before_first_request_func():
     # Crear aquí todas las bases de datos
-    heart.db.create_all()
+    db.create_all()
     print("Base de datos generada")
 
 

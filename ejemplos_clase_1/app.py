@@ -14,11 +14,13 @@ http://127.0.0.1:5000/
 '''
 
 import traceback
-from flask import Flask, request, jsonify, render_template, Response, redirect
+from flask import Flask, request, jsonify, render_template, Response
 
 # Crear el server Flask
 app = Flask(__name__)
 
+
+# ------------ Rutas o endpoints ----------------- #
 # Ruta que se ingresa por la ULR 127.0.0.1:5000
 @app.route("/")
 def index():
